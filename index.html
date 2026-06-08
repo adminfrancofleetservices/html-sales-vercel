@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Envio de Nota Fiscal — Franco Fleet Services</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F4F0;
+      --surface: #FFFFFF;
+      --border: #E2E0D8;
+      --border-focus: #C8763A;
+      --text: #1A1814;
+      --text-muted: #8C8878;
+      --accent: #C8763A;
+      --accent-hover: #A85E28;
+      --accent-light: #FDF0E6;
+      --error: #C0392B;
+      --success: #2E7D32;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 28px 32px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-icon svg {
+      width: 22px;
+      height: 22px;
+      color: #fff;
+    }
+
+    .header-text h1 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--text);
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .card-body {
+      padding: 28px 32px 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 7px;
+      letter-spacing: 0.1px;
+    }
+
+    label .required {
+      color: var(--accent);
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(200,118,58,0.12);
+    }
+
+    input[type="text"]:disabled {
+      background: #F9F8F5;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    input::placeholder { color: var(--text-muted); }
+
+    .input-prefix {
+      position: relative;
+    }
+
+    .input-prefix span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .input-prefix input {
+      padding-left: 36px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .lookup-status {
+      font-size: 12px;
+      margin-top: 5px;
+      min-height: 16px;
+      color: var(--text-muted);
+    }
+
+    .lookup-status.loading { color: var(--accent); }
+    .lookup-status.error { color: var(--error); }
+    .lookup-status.ok { color: var(--success); }
+
+    .file-drop {
+      position: relative;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: #FAFAF8;
+    }
+
+    .file-drop:hover,
+    .file-drop.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-drop-icon {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 10px;
+      color: var(--text-muted);
+    }
+
+    .file-drop-icon svg { width: 36px; height: 36px; }
+
+    .file-drop-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .file-drop-text strong {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .file-selected {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-light);
+      border: 1px solid #E8C4A0;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+
+    .file-selected.visible { display: flex; }
+
+    .file-selected-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-selected-icon svg { width: 16px; height: 16px; color: #fff; }
+
+    .file-selected-info { flex: 1; min-width: 0; }
+    .file-selected-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-selected-size { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .file-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.1s;
+    }
+    .file-remove:hover { color: var(--error); }
+    .file-remove svg { width: 16px; height: 16px; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 48px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: -0.1px;
+    }
+
+    .btn-submit:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-submit:active:not(:disabled) { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-submit .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert {
+      display: none;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .alert.visible { display: flex; }
+    .alert-icon { flex-shrink: 0; margin-top: 1px; }
+    .alert-icon svg { width: 16px; height: 16px; }
+
+    .alert.success {
+      background: #EDF7EE;
+      border: 1px solid #A5D6A7;
+      color: #1B5E20;
+    }
+
+    .alert.error {
+      background: #FDECEA;
+      border: 1px solid #FFCDD2;
+      color: #B71C1C;
+    }
+
+    .progress-bar {
+      display: none;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar.visible { display: block; }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 5px;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    input.invalid { border-color: var(--error) !important; }
+
+    .competencia-section {
+      margin-bottom: 4px;
+    }
+
+    .competencia-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media (max-width: 520px) {
+      .card-header, .card-body { padding-left: 20px; padding-right: 20px; }
+      .row-2 { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="header-icon">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Envio de Nota Fiscal</h1>
+      <p>Preencha os dados e anexe o PDF da sua NFSe.</p>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <div class="alert success" id="alertSuccess">
+      <span class="alert-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </span>
+      <span id="alertSuccessMsg">Nota fiscal enviada com sucesso!</span>
+    </div>
+
+    <div class="alert error" id="alertError">
+      <span class="alert-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </span>
+      <span id="alertErrorMsg">Ocorreu um erro. Tente novamente.</span>
+    </div>
+
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <form id="nfseForm" novalidate>
+
+      <div class="form-group">
+        <label for="cnpj">CNPJ <span class="required">*</span></label>
+        <input type="text" id="cnpj" name="cnpj" placeholder="XX.XXX.XXX/XXXX-XX" maxlength="18" autocomplete="off" />
+        <div class="lookup-status" id="cnpjStatus"></div>
+        <div class="field-error" id="cnpjError">CNPJ inválido.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="razaoSocial">Razão Social</label>
+        <input type="text" id="razaoSocial" name="razaoSocial" placeholder="Preenchido automaticamente via CNPJ" disabled />
+      </div>
+
+      <div class="form-group">
+        <label for="valor">Valor <span class="required">*</span></label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input type="text" id="valor" name="valor" placeholder="0,00" autocomplete="off" inputmode="decimal" />
+        </div>
+        <div class="field-error" id="valorError">Informe um valor válido.</div>
+      </div>
+
+      <div class="competencia-section">
+        <div class="competencia-title">Competência da NFSe</div>
+        <div class="row-2">
+          <div class="form-group">
+            <label for="mes">Mês <span class="required">*</span></label>
+            <input type="text" id="mes" name="mes" placeholder="MM" maxlength="2" inputmode="numeric" />
+            <div class="field-error" id="mesError">Mês inválido (01–12).</div>
+          </div>
+          <div class="form-group">
+            <label for="ano">Ano <span class="required">*</span></label>
+            <input type="text" id="ano" name="ano" placeholder="AAAA" maxlength="4" inputmode="numeric" />
+            <div class="field-error" id="anoError">Ano inválido.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nota Fiscal (PDF) <span class="required">*</span></label>
+        <div class="file-drop" id="fileDrop">
+          <input type="file" id="fileInput" accept="application/pdf" />
+          <div class="file-drop-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+          </div>
+          <div class="file-drop-text">
+            <strong>Clique para selecionar</strong> ou arraste aqui<br/>
+            <span>Somente arquivos PDF</span>
+          </div>
+        </div>
+        <div class="file-selected" id="fileSelected">
+          <div class="file-selected-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div class="file-selected-info">
+            <div class="file-selected-name" id="fileName"></div>
+            <div class="file-selected-size" id="fileSize"></div>
+          </div>
+          <button type="button" class="file-remove" id="fileRemove" aria-label="Remover arquivo">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="field-error" id="fileError">Selecione um arquivo PDF.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span class="btn-text">Enviar Nota Fiscal</span>
+        <div class="spinner"></div>
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // ── Configuração Supabase ──────────────────────────────────────
+  const SUPABASE_URL = 'https://ohtppqbjqlgzqcwatgqt.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9odHBwcWJqcWxnenFjd2F0Z3F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NTI3NDksImV4cCI6MjA2ODAyODc0OX0.1uT6RJAXgN1KxT14PjsnuTM8GIZZlkp3wbR3WHC0ZRY';
+  const BUCKET = 'nfse-files';
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function supabaseFetch(path, options = {}) {
+    return fetch(SUPABASE_URL + path, {
+      ...options,
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        ...(options.headers || {})
+      }
+    });
+  }
+
+  function formatCNPJ(v) {
+    v = v.replace(/\D/g, '').slice(0, 14);
+    if (v.length <= 2) return v;
+    if (v.length <= 5) return v.slice(0,2) + '.' + v.slice(2);
+    if (v.length <= 8) return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5);
+    if (v.length <= 12) return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5,8) + '/' + v.slice(8);
+    return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5,8) + '/' + v.slice(8,12) + '-' + v.slice(12);
+  }
+
+  function validateCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+    let sum = 0, pos = 5;
+    for (let i = 0; i < 12; i++) { sum += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
+    let r = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (r !== parseInt(cnpj[12])) return false;
+    sum = 0; pos = 6;
+    for (let i = 0; i < 13; i++) { sum += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
+    r = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    return r === parseInt(cnpj[13]);
+  }
+
+  function parseValue(v) {
+    return parseFloat(v.replace(/\./g, '').replace(',', '.'));
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function showAlert(type, msg) {
+    document.getElementById('alertSuccess').classList.remove('visible');
+    document.getElementById('alertError').classList.remove('visible');
+    if (type === 'success') {
+      document.getElementById('alertSuccessMsg').textContent = msg;
+      document.getElementById('alertSuccess').classList.add('visible');
+    } else {
+      document.getElementById('alertErrorMsg').textContent = msg;
+      document.getElementById('alertError').classList.add('visible');
+    }
+    document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fieldError(id, show) {
+    document.getElementById(id).classList.toggle('visible', show);
+  }
+
+  function markInvalid(id, invalid) {
+    document.getElementById(id).classList.toggle('invalid', invalid);
+  }
+
+  // ── Pré-preenche competência com mês anterior ─────────────────
+  (function() {
+    const now = new Date();
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const mes = String(prevMonth.getMonth() + 1).padStart(2, '0');
+    const ano = String(prevMonth.getFullYear());
+    document.getElementById('mes').value = mes;
+    document.getElementById('ano').value = ano;
+  })();
+
+  // ── CNPJ lookup ───────────────────────────────────────────────
+  let cnpjLookupTimer = null;
+
+  async function lookupCNPJ(cnpj) {
+    const digits = cnpj.replace(/\D/g, '');
+    if (digits.length !== 14) return;
+    const status = document.getElementById('cnpjStatus');
+    status.textContent = 'Consultando...';
+    status.className = 'lookup-status loading';
+    try {
+      const res = await fetch('https://api.cpfcnpj.com.br/6ac523d7c688774ae688ed768a0e78f2/10/' + digits);
+      const data = await res.json();
+      if (data.razao) {
+        document.getElementById('razaoSocial').value = data.razao;
+        status.textContent = 'Empresa encontrada.';
+        status.className = 'lookup-status ok';
+      } else {
+        document.getElementById('razaoSocial').value = '';
+        status.textContent = 'CNPJ não encontrado.';
+        status.className = 'lookup-status error';
+      }
+    } catch {
+      status.textContent = 'Erro ao consultar CNPJ.';
+      status.className = 'lookup-status error';
+    }
+  }
+
+  // ── Valor mask ────────────────────────────────────────────────
+  document.getElementById('valor').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (!v) { e.target.value = ''; return; }
+    v = (parseInt(v) / 100).toFixed(2);
+    e.target.value = parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  });
+
+  // ── CNPJ input ────────────────────────────────────────────────
+  document.getElementById('cnpj').addEventListener('input', function(e) {
+    e.target.value = formatCNPJ(e.target.value);
+    clearTimeout(cnpjLookupTimer);
+    const digits = e.target.value.replace(/\D/g, '');
+    if (digits.length === 14 && validateCNPJ(e.target.value)) {
+      cnpjLookupTimer = setTimeout(() => lookupCNPJ(e.target.value), 600);
+    } else {
+      document.getElementById('cnpjStatus').textContent = '';
+      document.getElementById('razaoSocial').value = '';
+    }
+  });
+
+  // ── File drop ─────────────────────────────────────────────────
+  let selectedFile = null;
+  const fileDrop = document.getElementById('fileDrop');
+  const fileInput = document.getElementById('fileInput');
+
+  function setFile(file) {
+    if (!file || file.type !== 'application/pdf') {
+      fieldError('fileError', true);
+      return;
+    }
+    fieldError('fileError', false);
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('fileSelected').classList.add('visible');
+    fileDrop.style.display = 'none';
+  }
+
+  fileInput.addEventListener('change', function() {
+    if (this.files[0]) setFile(this.files[0]);
+  });
+
+  document.getElementById('fileRemove').addEventListener('click', function() {
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('fileSelected').classList.remove('visible');
+    fileDrop.style.display = 'block';
+  });
+
+  fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+  fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag-over'));
+  fileDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    fileDrop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) setFile(file);
+  });
+
+  // ── Submit ────────────────────────────────────────────────────
+  document.getElementById('nfseForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Limpa alertas
+    document.getElementById('alertSuccess').classList.remove('visible');
+    document.getElementById('alertError').classList.remove('visible');
+
+    const cnpj = document.getElementById('cnpj').value;
+    const razaoSocial = document.getElementById('razaoSocial').value;
+    const valorRaw = document.getElementById('valor').value;
+    const mes = document.getElementById('mes').value;
+    const ano = document.getElementById('ano').value;
+
+    // Validações
+    let valid = true;
+
+    const cnpjValid = validateCNPJ(cnpj);
+    fieldError('cnpjError', !cnpjValid);
+    markInvalid('cnpj', !cnpjValid);
+    if (!cnpjValid) valid = false;
+
+    const valorNum = parseValue(valorRaw || '0');
+    const valorValid = !isNaN(valorNum) && valorNum > 0;
+    fieldError('valorError', !valorValid);
+    markInvalid('valor', !valorValid);
+    if (!valorValid) valid = false;
+
+    const mesNum = parseInt(mes);
+    const mesValid = mes.length > 0 && mesNum >= 1 && mesNum <= 12;
+    fieldError('mesError', !mesValid);
+    markInvalid('mes', !mesValid);
+    if (!mesValid) valid = false;
+
+    const anoNum = parseInt(ano);
+    const anoValid = ano.length === 4 && anoNum >= 2020 && anoNum <= 2100;
+    fieldError('anoError', !anoValid);
+    markInvalid('ano', !anoValid);
+    if (!anoValid) valid = false;
+
+    if (!selectedFile) {
+      fieldError('fileError', true);
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // UI loading
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    const progressBar = document.getElementById('progressBar');
+    progressBar.classList.add('visible');
+    setProgress(10);
+
+    try {
+      // 1. Upload do PDF
+      const cnpjDigits = cnpj.replace(/\D/g, '');
+      const timestamp = Date.now();
+      const filePath = cnpjDigits + '_' + timestamp + '.pdf';
+
+      setProgress(30);
+
+      const uploadRes = await supabaseFetch(
+        '/storage/v1/object/' + BUCKET + '/' + filePath,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/pdf' },
+          body: selectedFile
+        }
+      );
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error(err.message || 'Erro no upload do arquivo.');
+      }
+
+      setProgress(60);
+
+      // 2. URL pública
+      const publicUrl = SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + filePath;
+
+      // 3. Insert na tabela nfse
+      const insertRes = await supabaseFetch(
+        '/rest/v1/nfse',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            cnpj_nfse: cnpjDigits,
+            razao_social_nfse: razaoSocial || null,
+            valor_nfse: valorNum,
+            competencia_mes_nfse: mesNum,
+            competencia_ano_nfse: anoNum,
+            url_image_nfse: publicUrl
+          })
+        }
+      );
+
+      setProgress(90);
+
+      if (!insertRes.ok) {
+        const err = await insertRes.json().catch(() => ({}));
+        throw new Error(err.message || 'Erro ao salvar os dados.');
+      }
+
+      setProgress(100);
+
+      // Sucesso
+      setTimeout(() => {
+        progressBar.classList.remove('visible');
+        setProgress(0);
+      }, 800);
+
+      showAlert('success', 'Nota fiscal enviada com sucesso! Obrigado.');
+
+      // Reset form
+      document.getElementById('nfseForm').reset();
+      document.getElementById('razaoSocial').value = '';
+      document.getElementById('cnpjStatus').textContent = '';
+      document.getElementById('fileRemove').click();
+
+    } catch (err) {
+      setProgress(0);
+      progressBar.classList.remove('visible');
+      showAlert('error', err.message || 'Ocorreu um erro inesperado. Tente novamente.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  });
+</script>
+</body>
+</html>
