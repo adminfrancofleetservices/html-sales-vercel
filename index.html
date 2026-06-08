@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Rep Application — Franco Fleet Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1014;--surface:#151a21;--surface-2:#1c232c;--line:#2a323d;
+    --text:#eef1f4;--muted:#8a95a3;--amber:#ff6400;--amber-dim:#c24d00;
+    --green:#3ec46d;--red:#e2543f;--radius:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:18px;-webkit-font-smoothing:antialiased;overflow:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(900px 600px at 78% -10%,rgba(255,100,0,.10),transparent 60%),radial-gradient(700px 500px at -10% 110%,rgba(62,196,109,.05),transparent 55%)}
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 26px;background:rgba(13,16,20,.72);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Anton',sans-serif;letter-spacing:.06em;font-size:15px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+  .brandlogo{height:28px;width:auto;display:block}
+  .brand small{color:var(--muted);font-family:'Barlow Semi Condensed';letter-spacing:.18em;font-weight:600;font-size:10px;text-transform:uppercase}
+  .tag{display:inline-flex;align-items:center;gap:7px;color:var(--amber);background:rgba(255,100,0,.1);border:1px solid var(--amber-dim);font-family:'Barlow Semi Condensed';letter-spacing:.16em;font-weight:600;font-size:11px;text-transform:uppercase;padding:6px 13px;border-radius:30px}
+  .tag .pulse{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:tagpulse 1.8s infinite}
+  @keyframes tagpulse{0%{box-shadow:0 0 0 0 rgba(255,100,0,.6)}70%{box-shadow:0 0 0 7px rgba(255,100,0,0)}100%{box-shadow:0 0 0 0 rgba(255,100,0,0)}}
+  .progress{position:fixed;top:57px;left:0;right:0;height:3px;background:var(--surface);z-index:19}
+  .progress .bar{height:100%;width:0;background:var(--amber);transition:width .45s cubic-bezier(.4,0,.2,1)}
+  .stage{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;padding:90px 24px 40px}
+  .card{width:100%;max-width:660px}
+  .step{display:none;animation:rise .5s cubic-bezier(.16,1,.3,1)}
+  .step.active{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  .qnum{font-family:'Barlow Semi Condensed';font-weight:600;color:var(--amber);letter-spacing:.12em;font-size:13px;display:flex;align-items:center;gap:7px;margin-bottom:14px}
+  .qnum svg{width:13px;height:13px}
+  .qtext{font-size:30px;line-height:1.18;font-weight:600;margin-bottom:6px;letter-spacing:-.01em}
+  .qhint{color:var(--muted);font-size:15px;margin-bottom:26px}
+  .qtext + .qhint{margin-top:8px}
+  .field{width:100%;background:transparent;border:none;border-bottom:2px solid var(--line);color:var(--text);font-family:'Barlow';font-size:24px;padding:10px 2px;transition:.2s}
+  .field::placeholder{color:#4a5462}
+  .field:focus{outline:none;border-color:var(--amber)}
+  .phonewrap{display:flex;gap:12px;align-items:stretch}
+  .ccsel{position:relative;flex:none}
+  .ccsel select{appearance:none;-webkit-appearance:none;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);
+    color:var(--text);font-family:'Barlow';font-size:20px;font-weight:600;padding:10px 38px 10px 16px;cursor:pointer;height:100%;transition:.2s}
+  .ccsel select:focus{outline:none;border-color:var(--amber)}
+  .ccsel::after{content:"";position:absolute;right:15px;top:50%;transform:translateY(-30%);border:5px solid transparent;border-top-color:var(--muted);pointer-events:none}
+  .phonewrap .field{flex:1;font-size:24px}
+  .phonehint{color:var(--muted);font-size:13px;margin-top:10px;font-family:'Barlow Semi Condensed';letter-spacing:.04em}
+  textarea.field{resize:none;line-height:1.45;font-size:20px;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-height:150px}
+  textarea.field:focus{border-color:var(--amber)}
+  .choices{display:flex;flex-direction:column;gap:11px}
+  .choice{display:flex;align-items:center;gap:14px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);padding:15px 18px;cursor:pointer;transition:.16s;user-select:none}
+  .choice:hover{border-color:#3c4654;background:var(--surface-2)}
+  .choice .key{width:26px;height:26px;flex:none;border:1.5px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Semi Condensed';font-weight:600;font-size:13px;color:var(--muted);transition:.16s}
+  .choice .ctxt{font-size:18px;font-weight:500}
+  .choice.sel{border-color:var(--amber);background:rgba(255,100,0,.08)}
+  .choice.sel .key{background:var(--amber);border-color:var(--amber);color:#1a1205}
+  .choice.multi .key{border-radius:50%}
+  .scale{display:flex;gap:10px}
+  .scale .sc{flex:1;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px 0;text-align:center;cursor:pointer;transition:.16s;font-family:'Anton';font-size:24px;color:var(--muted)}
+  .scale .sc:hover{border-color:#3c4654}
+  .scale .sc.sel{border-color:var(--amber);background:rgba(255,100,0,.10);color:var(--amber)}
+  .scalelabels{display:flex;justify-content:space-between;color:var(--muted);font-size:12.5px;margin-top:10px;font-family:'Barlow Semi Condensed';letter-spacing:.04em;text-transform:uppercase}
+  .actions{display:flex;align-items:center;gap:16px;margin-top:30px}
+  .btn{background:var(--amber);color:#1a1205;border:none;border-radius:8px;font-family:'Barlow';font-weight:700;font-size:17px;padding:13px 26px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:.16s}
+  .btn:hover{background:#ff8124;transform:translateY(-1px)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .enterhint{color:var(--muted);font-size:13px;font-family:'Barlow Semi Condensed';letter-spacing:.04em}
+  .enterhint b{color:var(--text);font-weight:600}
+  .back{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Barlow';font-size:14px;display:inline-flex;align-items:center;gap:5px;margin-left:auto;transition:.16s}
+  .back:hover{color:var(--text)}
+  .err{color:var(--red);font-size:14px;margin-top:12px;min-height:18px;font-weight:500}
+  .welcome .kicker{font-family:'Barlow Semi Condensed';font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);font-size:13px;margin-bottom:18px}
+  .welcome h1{font-family:'Anton';font-size:clamp(40px,7vw,68px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin-bottom:22px}
+  .welcome h1 em{font-style:normal;color:var(--amber)}
+  .welcome p{color:#c3cbd5;font-size:19px;line-height:1.55;max-width:560px;margin-bottom:14px}
+  .welcome .warn{color:var(--muted);font-size:15.5px;border-left:2px solid var(--amber-dim);padding-left:14px;margin:24px 0 30px}
+  .meta{display:flex;gap:24px;color:var(--muted);font-size:13px;font-family:'Barlow Semi Condensed';letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+  .meta b{color:var(--text)}
+  .hazard{height:10px;background:repeating-linear-gradient(45deg,var(--amber) 0 16px,#1a1205 16px 32px);border-radius:3px;margin-bottom:34px;opacity:.85}
+  .thanks{text-align:center}
+  .thanks .check{width:74px;height:74px;border-radius:50%;background:rgba(62,196,109,.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 26px}
+  .thanks .check svg{width:36px;height:36px;stroke:var(--green)}
+  .thanks h2{font-family:'Anton';font-size:40px;text-transform:uppercase;margin-bottom:16px}
+  .thanks p{color:#c3cbd5;font-size:18px;line-height:1.55;max-width:480px;margin:0 auto 12px}
+  .thanks .ps{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:18px;margin-top:26px;max-width:480px;margin-left:auto;margin-right:auto}
+  .sending{display:none;align-items:center;gap:10px;color:var(--muted);font-size:15px}
+  .spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:560px){.qtext{font-size:25px}.welcome p{font-size:17px}.scale{gap:6px}.scale .sc{font-size:20px;padding:14px 0}}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><svg class="brandlogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 172 40" fill="none" role="img" aria-label="Franco Fleet Services"><path d="M0 4.17755L5.22193 0H5.48303V35.5614H41.7755V35.7702L36.5013 40H0V4.17755Z" fill="#FF6400"></path><rect x="44.9086" y="27.2585" width="126.162" height="1.8799" rx="0.939948" fill="#FF6400"></rect><path d="M86.9954 37.5479V32.5877H90.7232V33.666H88.4434V34.5209H90.4305V35.6146H88.4434V37.5479H86.9954Z" fill="#eef1f4"></path><path d="M93.2663 37.5479V32.5877H94.7143V36.4388H96.9479V37.5479H93.2663Z" fill="#eef1f4"></path><path d="M99.4921 37.5479V32.5877H103.251V33.6968H100.94V34.5055H102.966V35.63H100.94V36.4388H103.251V37.5479H99.4921Z" fill="#eef1f4"></path><path d="M105.868 37.5479V32.5877H109.627V33.6968H107.316V34.5055H109.342V35.63H107.316V36.4388H109.627V37.5479H105.868Z" fill="#eef1f4"></path><path d="M113.33 37.5479V33.666H111.936V32.5877H116.173V33.666H114.778V37.5479H113.33Z" fill="#eef1f4"></path><path d="M124.072 37.6249C123.738 37.6249 123.423 37.5992 123.125 37.5479C122.827 37.4914 122.573 37.4144 122.362 37.3168V36.123C122.593 36.2308 122.85 36.3181 123.133 36.3848C123.415 36.4516 123.679 36.485 123.926 36.485C124.183 36.485 124.375 36.4644 124.504 36.4234C124.637 36.3771 124.704 36.277 124.704 36.123C124.704 36.0151 124.665 35.9304 124.588 35.8688C124.516 35.8072 124.401 35.7507 124.242 35.6994C124.088 35.648 123.885 35.5838 123.633 35.5068C123.299 35.399 123.035 35.2809 122.84 35.1525C122.645 35.0241 122.504 34.8675 122.416 34.6827C122.334 34.4978 122.293 34.2719 122.293 34.0049C122.293 33.5171 122.465 33.1474 122.809 32.8958C123.158 32.639 123.674 32.5107 124.357 32.5107C124.629 32.5107 124.909 32.5338 125.197 32.58C125.489 32.6262 125.726 32.6776 125.905 32.734V33.9356C125.664 33.838 125.433 33.7687 125.212 33.7276C124.991 33.6865 124.783 33.666 124.588 33.666C124.362 33.666 124.17 33.684 124.011 33.7199C123.851 33.7559 123.772 33.8483 123.772 33.9972C123.772 34.1256 123.839 34.2206 123.972 34.2822C124.111 34.3387 124.355 34.4131 124.704 34.5055C125.109 34.6134 125.418 34.7443 125.628 34.8983C125.844 35.0524 125.99 35.2321 126.067 35.4375C126.144 35.6377 126.183 35.8662 126.183 36.123C126.183 36.5748 126.008 36.9394 125.659 37.2167C125.31 37.4888 124.781 37.6249 124.072 37.6249Z" fill="#eef1f4"></path><path d="M128.876 37.5479V32.5877H132.635V33.6968H130.324V34.5055H132.35V35.63H130.324V36.4388H132.635V37.5479H128.876Z" fill="#eef1f4"></path><path d="M135.252 37.5479V32.5877H137.832C138.238 32.5877 138.569 32.6622 138.826 32.8111C139.088 32.96 139.283 33.1679 139.411 33.4349C139.54 33.6968 139.604 34.0023 139.604 34.3515C139.604 34.6852 139.519 34.9805 139.35 35.2372C139.185 35.4888 138.965 35.6814 138.687 35.8149C138.744 35.8611 138.793 35.9176 138.834 35.9843C138.875 36.046 138.921 36.1332 138.972 36.2462L139.542 37.5479H138.033L137.509 36.354C137.468 36.2616 137.416 36.1974 137.355 36.1615C137.298 36.1204 137.216 36.0999 137.108 36.0999H136.7V37.5479H135.252ZM136.7 34.9908H137.463C137.673 34.9908 137.835 34.9368 137.948 34.829C138.066 34.7161 138.125 34.5569 138.125 34.3515C138.125 33.915 137.92 33.6968 137.509 33.6968H136.7V34.9908Z" fill="#eef1f4"></path><path d="M143.542 37.5479L141.64 32.5877H143.149L144.305 35.8688L145.46 32.5877H146.977L145.075 37.5479H143.542Z" fill="#eef1f4"></path><path d="M149.562 37.5479V32.5877H151.01V37.5479H149.562Z" fill="#eef1f4"></path><path d="M156.473 37.6249C155.574 37.6249 154.889 37.4041 154.416 36.9625C153.944 36.5209 153.708 35.897 153.708 35.0909C153.708 34.2591 153.939 33.6224 154.401 33.1808C154.863 32.734 155.551 32.5107 156.465 32.5107C156.773 32.5107 157.048 32.5338 157.289 32.58C157.531 32.6262 157.762 32.6904 157.982 32.7726V34.0357C157.541 33.8406 157.068 33.743 156.565 33.743C156.098 33.743 155.751 33.8509 155.525 34.0665C155.3 34.277 155.187 34.6185 155.187 35.0909C155.187 35.553 155.305 35.8868 155.541 36.0922C155.782 36.2924 156.129 36.3926 156.581 36.3926C156.827 36.3926 157.066 36.3694 157.297 36.3232C157.533 36.277 157.767 36.2051 157.998 36.1076V37.3784C157.777 37.4554 157.543 37.5145 157.297 37.5556C157.056 37.6018 156.781 37.6249 156.473 37.6249Z" fill="#eef1f4"></path><path d="M160.697 37.5479V32.5877H164.455V33.6968H162.145V34.5055H164.17V35.63H162.145V36.4388H164.455V37.5479H160.697Z" fill="#eef1f4"></path><path d="M168.698 37.6249C168.364 37.6249 168.049 37.5992 167.751 37.5479C167.453 37.4914 167.199 37.4144 166.988 37.3168V36.123C167.219 36.2308 167.476 36.3181 167.759 36.3848C168.041 36.4516 168.305 36.485 168.552 36.485C168.809 36.485 169.001 36.4644 169.13 36.4234C169.263 36.3771 169.33 36.277 169.33 36.123C169.33 36.0151 169.291 35.9304 169.214 35.8688C169.142 35.8072 169.027 35.7507 168.868 35.6994C168.714 35.648 168.511 35.5838 168.259 35.5068C167.925 35.399 167.661 35.2809 167.466 35.1525C167.271 35.0241 167.13 34.8675 167.042 34.6827C166.96 34.4978 166.919 34.2719 166.919 34.0049C166.919 33.5171 167.091 33.1474 167.435 32.8958C167.784 32.639 168.3 32.5107 168.983 32.5107C169.255 32.5107 169.535 32.5338 169.823 32.58C170.115 32.6262 170.352 32.6776 170.531 32.734V33.9356C170.29 33.838 170.059 33.7687 169.838 33.7276C169.617 33.6865 169.409 33.666 169.214 33.666C168.988 33.666 168.796 33.684 168.637 33.7199C168.477 33.7559 168.398 33.8483 168.398 33.9972C168.398 34.1256 168.465 34.2206 168.598 34.2822C168.737 34.3387 168.981 34.4131 169.33 34.5055C169.735 34.6134 170.044 34.7443 170.254 34.8983C170.47 35.0524 170.616 35.2321 170.693 35.4375C170.77 35.6377 170.809 35.8662 170.809 36.123C170.809 36.5748 170.634 36.9394 170.285 37.2167C169.936 37.4888 169.407 37.6249 168.698 37.6249Z" fill="#eef1f4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M11.2121 29.2088L12.5386 27.8681C13.2682 27.1308 13.8972 26.5274 13.9363 26.5274C14.1914 26.5274 17.2067 27.3853 17.4025 27.5135C17.5984 27.6419 17.7175 27.9629 18.0332 29.2144C18.2473 30.063 18.4476 30.8519 18.4785 30.9677C18.5222 31.1316 18.2671 31.4437 17.3263 32.3777C16.6616 33.0373 16.021 33.6211 15.9026 33.6749C15.673 33.7792 15.569 33.7579 13.529 33.1896C12.8766 33.0078 12.5403 32.9201 12.3246 32.7091C12.0847 32.4745 11.9939 32.0875 11.7833 31.249C11.6432 30.6913 11.4574 30.0041 11.3703 29.7219L11.2121 29.2088ZM12.3991 29.5642L13.2939 28.6362C14.0497 27.8525 14.2294 27.7166 14.4499 27.7609C14.5935 27.7899 15.1785 27.9371 15.7499 28.0882L16.7886 28.3629L17.078 29.5079C17.2371 30.1375 17.3454 30.7232 17.3185 30.8094C17.2916 30.8956 16.8655 31.3379 16.3715 31.7924L15.4733 32.6186L14.57 32.3982C14.0731 32.2771 13.5426 32.1524 13.3909 32.1212C13.0674 32.0546 13.0514 32.021 12.6822 30.6307L12.3991 29.5642Z" fill="#eef1f4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M5.22198 0H41.7755V35.8225H41.1149C39.6422 35.8817 35.0831 35.875 32.4316 35.8225H5.22198V0ZM41.2533 29.1147L39.8742 27.761C39.0952 26.9963 38.402 26.3581 38.3338 26.3428C38.2656 26.3273 36.2928 28.2327 33.95 30.5768L29.6903 34.8389L30.0891 35.3003H41.2533V29.1147ZM32.3774 5.67927C33.0696 4.97692 33.7045 4.61775 34.7557 4.3342C35.3744 4.16731 36.3662 4.13765 36.5904 4.27948C36.7149 4.35812 36.4433 4.68387 35.2477 5.88982L33.7489 7.40136L33.8226 8.00878C33.8631 8.34287 33.9738 9.08303 34.0686 9.65368C34.2363 10.6631 34.2495 10.6934 34.5544 10.7751C34.8548 10.8558 36.2852 11.0978 37.169 11.2175L37.5904 11.2747L39.1521 9.71039C40.0109 8.85013 40.7494 8.14621 40.7932 8.14621C40.9295 8.14621 40.8781 9.73619 40.7229 10.3191C40.4021 11.5246 39.4317 12.822 38.3887 13.4403C37.7486 13.8198 36.7717 14.0992 36.0848 14.0992C35.2466 14.0992 34.8698 14.2347 34.1629 14.79L33.543 15.277L32.5865 14.3342C31.8151 13.5738 31.5245 13.3574 31.0842 13.2156C30.6294 13.069 30.4723 13.0606 30.1442 13.165C29.6368 13.3265 29.3734 13.4415 29.1635 13.593C29.0269 13.6918 28.9129 13.6571 28.5653 13.4111C28.3291 13.2439 28.1348 13.0793 28.1336 13.0454C28.1324 13.0115 28.714 12.3981 29.4262 11.6823C30.8221 10.2793 30.9496 10.0577 30.9506 9.02977C30.9513 8.40867 31.1868 7.43843 31.4895 6.80982C31.6083 6.56303 32.0079 6.05431 32.3774 5.67927ZM23.261 12.5662C23.1595 12.1617 23.3015 11.5563 23.5444 11.3577C23.6883 11.2401 23.9467 11.1749 24.2688 11.1749C24.6812 11.1749 24.8408 11.2348 25.1736 11.5144C25.7584 12.0058 28.1314 14.3665 28.1314 14.4569C28.1314 14.5843 27.0814 15.7499 26.8012 15.9335L26.5396 16.1049L24.9321 14.4623C24.048 13.559 23.296 12.7057 23.261 12.5662ZM20.4033 14.1597C20.404 13.8101 20.7977 13.2633 21.1576 13.112C21.7963 12.8434 22.2158 13.1284 24.3007 15.2475C25.9039 16.877 25.9507 16.9369 25.8735 17.2624C25.8298 17.4469 25.7987 17.6214 25.8047 17.6501C25.9018 18.1234 25.9403 18.3078 25.869 18.426C25.8228 18.5025 25.7307 18.5513 25.5788 18.6327C24.8992 18.9969 24.5671 18.8027 22.6745 16.9348C20.9967 15.2791 20.4026 14.5532 20.4033 14.1597ZM26.7904 17.7079C26.7669 17.5887 27.3164 16.9616 28.4049 15.8655C29.9337 14.3258 30.0829 14.2037 30.4352 14.2037C30.6893 14.2037 30.9506 14.303 31.2228 14.5028C31.8881 14.9913 34.1427 17.3592 34.3737 17.8119C34.7291 18.5085 34.8998 19.2836 35.132 21.2533C35.4439 23.8983 35.6562 24.6054 36.5305 25.9103L36.7818 26.2854L33.3063 29.7598C30.2838 32.7813 29.8052 33.22 29.6338 33.1269C29.3807 32.989 23.4898 27.0621 23.546 27.0017C23.5693 26.9767 24.8925 25.6461 26.4865 24.0447C29.2359 21.2825 29.3846 21.1132 29.3846 20.746C29.3846 20.3243 29.2293 20.1978 28.8361 20.299C28.5534 20.3718 20.319 28.5825 20.0757 29.0339C19.9815 29.2089 19.8711 29.7591 19.8292 30.2628C19.7268 31.4926 19.4481 32.3358 18.8961 33.0856C18.3831 33.7825 17.3884 34.5403 16.5909 34.8418C15.8644 35.1165 14.0084 35.1191 13.1993 34.8466C11.9827 34.4369 10.8219 33.3491 10.3592 32.1853C10.1551 31.6719 10.123 31.3974 10.1197 30.1305C10.1158 28.7032 10.1235 28.6519 10.4448 27.9738C11.2167 26.3445 12.8602 25.2826 14.711 25.2172C15.8233 25.1779 15.9762 25.1021 17.0218 24.0734L18.0014 23.1097L18.9672 24.098C20.1237 25.2815 20.7666 25.6895 21.4769 25.691C22.6418 25.6932 23.7338 24.6438 23.6583 23.5945C23.629 23.1874 23.6603 23.0923 23.8672 22.9582C24.001 22.8715 24.2283 22.7717 24.3722 22.7363C24.8153 22.6274 25.4099 21.9222 25.5699 21.3159C25.6929 20.8495 25.6922 20.72 25.5648 20.415C25.4829 20.2192 25.416 20.0135 25.416 19.9578C25.416 19.9022 25.6932 19.7159 26.032 19.5437C26.6234 19.2432 26.9598 19.2127 27.2463 19.4339C27.3052 19.4794 27.5939 19.5485 27.8881 19.5876C28.5415 19.6743 29.299 19.4494 29.8625 19.0016C30.2651 18.6817 30.7155 18.605 30.9303 18.8198C31.1029 18.9924 31.0892 19.5993 30.9112 19.6676C30.6894 19.7527 29.8024 20.9516 29.802 21.167C29.8018 21.2718 29.7114 21.5057 29.601 21.6866C29.4449 21.9428 29.4046 22.1873 29.4187 22.7933C29.4287 23.2212 29.4874 23.6372 29.5491 23.7177C29.6109 23.7983 29.7158 24.0551 29.7824 24.2885C29.9068 24.7246 30.9649 26.0082 31.195 26.0019C31.3259 25.9983 31.8912 25.5342 31.8912 25.4302C31.8912 25.3955 31.6152 25.0466 31.278 24.6547C30.7515 24.043 30.6494 23.855 30.5561 23.3255C30.4374 22.6514 30.5277 21.916 30.7881 21.4375C30.8745 21.2788 31.1588 20.9138 31.42 20.6266C31.9204 20.0765 32.2701 19.2087 32.1396 18.8409C32.0138 18.4863 31.5743 17.967 31.2643 17.8067C30.7476 17.5394 30.2404 17.6135 29.3846 18.081C28.3609 18.6403 27.7959 18.6732 27.2196 18.2071C27.003 18.032 26.8099 17.8073 26.7904 17.7079ZM18.9908 17.7468C18.7437 17.2751 19.0218 16.4928 19.5115 16.282C19.6284 16.2318 19.9098 16.2102 20.1368 16.2344C20.5141 16.2745 20.7226 16.4519 22.565 18.3011C24.5499 20.2934 24.5805 20.3309 24.5805 20.7685C24.5805 21.136 24.5222 21.2661 24.2433 21.5207C23.8375 21.8915 23.6106 21.9735 23.2453 21.8818C22.942 21.8056 19.2241 18.1923 18.9908 17.7468ZM16.9564 20.0458C16.9564 19.6771 17.0189 19.5277 17.2902 19.2478C17.6607 18.8656 18.0339 18.8053 18.5021 19.052C18.6572 19.1337 19.6418 20.0648 20.6901 21.121C22.4795 22.924 22.5961 23.0655 22.5961 23.432C22.5961 24.0447 22.3506 24.4123 21.8517 24.5466C21.534 24.6323 21.347 24.6313 21.1342 24.5432C20.9759 24.4776 19.9712 23.541 18.9014 22.4617C16.9773 20.5206 16.9564 20.4947 16.9564 20.0458Z" fill="#eef1f4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M150.969 12.6757C151.907 9.75467 154.435 8.13525 158.523 7.83802C162.839 7.52418 166.182 8.42527 167.919 10.3705C169.018 11.6018 169.428 12.7968 169.432 14.7781C169.435 16.8271 168.905 18.2207 167.659 19.4341C165.936 21.1122 163.215 21.8422 159.254 21.6891C154.716 21.5136 152.187 20.1307 151.105 17.2324C150.832 16.503 150.812 16.3377 150.805 14.8303C150.799 13.5982 150.839 13.0834 150.969 12.6757ZM156.651 13.3681C157.094 12.4124 157.846 11.7784 158.836 11.524C159.498 11.354 160.963 11.4102 161.667 11.6323C162.259 11.8192 163.032 12.4413 163.388 13.0165C163.75 13.6022 163.915 14.5535 163.784 15.2995C163.637 16.1411 163.473 16.5012 163.005 17.0201C162.268 17.8356 161.106 18.2003 159.574 18.0972C158.596 18.0315 158.013 17.7982 157.378 17.2181C156.649 16.5511 156.382 15.8885 156.383 14.748C156.384 14.1054 156.438 13.8264 156.651 13.3681Z" fill="#eef1f4"></path><path d="M134.041 8.93096C134.751 8.5625 135.735 8.25034 136.852 8.03969C138.331 7.76083 141.543 7.76188 143.066 8.04178C145.893 8.56115 147.85 9.8377 148.749 11.7493C149.045 12.3803 149.176 12.6394 149.097 12.7599C149.037 12.8518 148.853 12.863 148.527 12.897C148.166 12.9348 146.854 12.9505 145.612 12.9319L143.354 12.8982L142.863 12.445C142.248 11.878 141.688 11.6274 140.688 11.472C139.676 11.3145 138.556 11.4891 137.797 11.9227C135.802 13.062 135.725 16.3235 137.664 17.5534C138.356 17.9924 138.843 18.106 140.037 18.1076C141.413 18.1093 142.028 17.897 142.8 17.154L143.369 16.6057H149.099L149.043 16.9458C148.925 17.6756 148.413 18.5282 147.605 19.3441C146.95 20.0044 146.627 20.2359 145.823 20.6227C144.075 21.4634 142.051 21.7927 139.254 21.6912C137.057 21.6115 135.311 21.2605 134.084 20.6517C133.469 20.3465 132.351 19.4905 132.025 19.0759C131.581 18.5095 131.036 17.4481 130.841 16.7679C130.605 15.9445 130.607 13.6847 130.844 12.8033C131.284 11.1653 132.443 9.76136 134.041 8.93096Z" fill="#eef1f4"></path><path d="M47.6614 21.4099V8.04178H62.9819L63.0468 9.25243C63.0825 9.91833 63.0833 10.6703 63.0486 10.9234L62.9855 11.3838L53.2489 11.3851L53.2545 12.1938C53.2575 12.6386 53.2693 13.1084 53.2806 13.2376L53.3011 13.4726H61.4473V15.9499L60.899 16.0051C60.5974 16.0354 59.6789 16.0363 58.8578 16.0071C58.0369 15.9779 56.4506 15.9883 55.333 16.0302L53.3011 16.1064V21.4099H47.6614Z" fill="#eef1f4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M65.2593 21.3577L65.2055 8.02444L71.2899 8.07039C77.5849 8.11791 78.2304 8.15802 79.9465 8.60909C82.019 9.15384 83.2149 10.3351 83.4901 12.1095C83.7124 13.5417 83.434 14.6079 82.5963 15.5337C82.2842 15.8786 81.8691 16.2366 81.674 16.3292C81.0795 16.6113 81.0449 16.7346 81.4801 17.0197C82.3431 17.585 82.6436 17.9699 82.9138 18.856C83.055 19.3188 83.1726 19.836 83.1751 20.0054C83.1792 20.2787 83.2868 20.6458 83.5338 21.2289C83.6076 21.403 83.457 21.4119 80.867 21.3856L78.1221 21.3577L77.6925 20.1044C77.4563 19.4151 77.1998 18.754 77.1226 18.6353C76.916 18.3175 76.3632 17.969 75.79 17.795C75.1818 17.6105 72.5415 17.485 71.536 17.5929L70.8151 17.6702L70.8754 19.2528C70.9085 20.1233 70.91 20.9655 70.8786 21.1244L70.8218 21.4133L65.2593 21.3577ZM70.9046 13.457C70.8648 13.0528 70.8644 12.421 70.9039 12.0529L70.9755 11.3838H73.0446C75.9174 11.3838 77.2766 11.6052 77.723 12.146C77.926 12.392 77.979 13.0649 77.8193 13.3677C77.7437 13.511 77.4784 13.7405 77.2299 13.8776C76.8113 14.1085 76.6046 14.1345 74.4363 14.2292C73.1484 14.2854 71.8432 14.3001 71.5359 14.2617L70.977 14.1919L70.9046 13.457Z" fill="#eef1f4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M89.9221 12.8794C91.1774 10.916 92.3809 9.02433 92.5964 8.67572L92.9885 8.04178H95.5506C98.0733 8.04178 98.1161 8.04543 98.3311 8.27676C98.5285 8.4894 99.9192 10.6512 104.764 18.2768C105.658 19.6841 106.48 20.953 106.591 21.0966L106.793 21.3577L104.251 21.4099C102.852 21.4386 101.552 21.4386 101.361 21.4099C101.047 21.3626 100.964 21.2654 100.472 20.3655L99.9285 19.3734L97.4714 19.2815C96.12 19.2309 94.1881 19.224 93.1784 19.266L91.3425 19.3426L90.2114 21.3577L84.4106 21.4133L84.6646 21.0722C84.8044 20.8846 85.5309 19.7676 86.2792 18.5901C87.0275 17.4125 88.6667 14.8427 89.9221 12.8794ZM93.4528 15.8525C93.3922 15.7918 95.1743 12.6007 95.527 12.1385C95.5829 12.0653 95.6503 12.0273 95.6771 12.0539C95.7037 12.0806 96.2149 12.9394 96.8131 13.9624L97.9007 15.8225L97.4547 15.9045C96.9219 16.0026 93.5588 15.959 93.4528 15.8525Z" fill="#eef1f4"></path><path d="M108.445 21.4099V8.04178H115.11L116.204 9.32115C116.806 10.0248 117.552 10.906 117.863 11.2794C118.174 11.6527 119.181 12.8512 120.1 13.9426C121.019 15.0339 121.884 16.0804 122.022 16.268C122.16 16.4556 122.382 16.681 122.516 16.7691L122.761 16.929L122.633 8.17546L122.967 8.10862C123.151 8.07186 124.418 8.04178 125.783 8.04178C127.951 8.04178 128.274 8.06277 128.329 8.207C128.364 8.29786 128.392 11.3057 128.392 14.8911V21.4099H121.614L120.716 20.3394C120.222 19.7506 118.54 17.7373 116.977 15.8654L114.137 12.4619L114.082 21.4099H108.445Z" fill="#eef1f4"></path></svg></div>
+    <div class="tag"><span class="pulse"></span>Now Hiring · Sales</div>
+  </div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+
+  <div class="stage"><div class="card" id="card"></div></div>
+
+<script>
+/* ===== CONFIG ===== */
+const WEBHOOK_URL = "https://n8n-n8n.tre80f.easypanel.host/webhook-test/2757dd4b-459f-4c88-aa18-b7007f2282a6";
+
+let step = 0;
+const answers = {};
+
+const COUNTRIES = [
+  { code:'US', flag:'🇺🇸', dial:'+1',  name:'United States', len:10 },
+  { code:'CA', flag:'🇨🇦', dial:'+1',  name:'Canada',        len:10 },
+  { code:'MX', flag:'🇲🇽', dial:'+52', name:'Mexico',        len:10 },
+  { code:'BR', flag:'🇧🇷', dial:'+55', name:'Brazil',        len:11 },
+  { code:'GB', flag:'🇬🇧', dial:'+44', name:'United Kingdom',len:10 },
+  { code:'OT', flag:'🌐', dial:'',    name:'Other',          len:0  }
+];
+
+const QUESTIONS = [
+  { id:'welcome',          type:'welcome' },
+  { id:'name',             type:'text',   inputType:'text',  required:true },
+  { id:'email',            type:'text',   inputType:'email', required:true },
+  { id:'phone',            type:'phone',  required:true },
+  { id:'location',         type:'text',   inputType:'text',  required:true },
+  { id:'years_b2b',        type:'single', values:['<1','1-3','3-5','5+'], required:true },
+  { id:'deal_origin',      type:'single', values:['inbound','cold','mix'], required:true },
+  { id:'longest_cycle',    type:'single', values:['sameday','days','weeks','months'], required:true },
+  { id:'industries',       type:'multi',  values:['logistics','transport','trucking','industrial','construction','field','none'], required:true },
+  { id:'coldcall_comfort', type:'scale',  values:[1,2,3,4,5], required:true },
+  { id:'scenario',         type:'long',   required:true },
+  { id:'comp_model',       type:'single', values:['commission','base_commission','either'], required:true },
+  { id:'target_earnings',  type:'text',   inputType:'text',  required:true },
+  { id:'spanish_level',    type:'single', values:['fluent','conversational','no'], required:true },
+  { id:'availability',     type:'single', values:['fulltime','parttime'], required:true },
+  { id:'why_you',          type:'long',   required:true },
+  { id:'contact_link',     type:'text',   inputType:'text',  required:true },
+  { id:'thankyou',         type:'thankyou' },
+];
+
+const T = {
+  welcome:{
+    kicker:'Now Hiring · Sales',
+    h1:['Sales Rep —','<em>Fleet Client Acquisition</em>'],
+    p1:"Franco Fleet Services is a mobile truck & trailer maintenance company serving large fleets. We're hiring a <b>hunter</b> — someone who opens doors with companies that don't know us yet, not someone who waits for leads to come in.",
+    p2:"This is a commission-driven role.",
+    warn:"If you're the closer type who hates prospecting, this isn't for you — and that's fine.",
+    meta:['≈ 4 min','15 questions','Sales'],
+    cta:'Start application'
+  },
+  q:{
+    name:{t:"What's your full name?"},
+    email:{t:"Your best email?"},
+    phone:{t:"Phone / cell",h:"Where we can reach you fast.",ph:"Phone number"},
+    location:{t:"Where are you based?",h:"City, State."},
+    years_b2b:{t:"How many years in B2B sales?",o:["Less than 1 year","1–3 years","3–5 years","5+ years"]},
+    deal_origin:{t:"In your last sales role, where did MOST of your deals come from?",
+      o:["Leads that came to me (inbound, marketing, referrals)","Companies I found and opened myself (cold outreach)","About 50/50"]},
+    longest_cycle:{t:"What's the longest sales cycle you've personally closed?",o:["Same day","Days","A few weeks","Months"]},
+    industries:{t:"Have you sold to any of these industries?",h:"Select all that apply.",
+      o:["Logistics","Transportation","Trucking","Industrial","Construction","Field services","None of these"]},
+    coldcall_comfort:{t:"How comfortable are you cold-calling a fleet manager who's never heard of us?",lo:"I avoid it",hi:"My favorite part"},
+    scenario:{t:"A company runs 80 trucks and is loyal to the shop they already use.",
+      h:"Write the first 2–3 sentences of how you'd open a cold call to their fleet manager.",ph:"Hi, this is..."},
+    comp_model:{t:"What compensation model works for you?",o:["Commission-only","Base + commission","Either, depending on numbers"]},
+    target_earnings:{t:"Target monthly earnings?",h:"Ballpark, in USD.",ph:"e.g. $6,000"},
+    spanish_level:{t:"Do you speak Spanish?",h:"Many fleet operators are Spanish-speaking.",o:["Fluent","Conversational","No"]},
+    availability:{t:"Availability?",o:["Full-time","Part-time"]},
+    why_you:{t:"In one sentence: why should we pick you over another rep?",ph:"Because..."},
+    contact_link:{t:"Paste your LinkedIn or a link to your resume.",h:"A URL works fine.",ph:"https://linkedin.com/in/..."}
+  },
+  ui:{ok:'OK',next:'Next',enter:'press <b>Enter ↵</b>',back:'Back',
+    reqText:'Please fill this in.',reqChoice:'Please pick an option.',reqEmail:'Enter a valid email.',
+    reqPhone:'Please enter your phone number.',
+    reqPhoneLen:'A {c} number needs {n} digits.',
+    sending:'Submitting your application…'},
+  thanks:{h:"Application received",
+    p:"Thanks — we review every application. If your profile fits, you'll hear from us within a few business days for a short call.",
+    ps:"Heads up: that call will start exactly like the cold-call scenario you just answered."}
+};
+
+const ICON_ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+function activeQuestions(){ return QUESTIONS; }
+function numberedIndex(q){ const list=activeQuestions().filter(x=>!['welcome','thankyou'].includes(x.type)); return list.indexOf(q)+1; }
+function totalNumbered(){ return activeQuestions().filter(x=>!['welcome','thankyou'].includes(x.type)).length; }
+
+function render(){
+  const list=activeQuestions();
+  const q=list[step];
+  const card=document.getElementById('card');
+  const ui=T.ui;
+  let html='';
+
+  if(q.type==='welcome'){
+    const w=T.welcome;
+    html=`<div class="step active welcome">
+      <div class="hazard"></div>
+      <div class="kicker">${w.kicker}</div>
+      <h1>${w.h1[0]}<br>${w.h1[1]}</h1>
+      <p>${w.p1}</p><p>${w.p2}</p>
+      <div class="warn">${w.warn}</div>
+      <div class="actions"><button class="btn" onclick="go(1)">${w.cta} ${ICON_ARROW}</button></div>
+      <div class="meta"><span><b>${w.meta[0]}</b></span><span><b>${w.meta[1]}</b></span><span><b>${w.meta[2]}</b></span></div>
+    </div>`;
+  }
+  else if(q.type==='thankyou'){
+    const tk=T.thanks;
+    html=`<div class="step active thanks">
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></div>
+      <h2>${tk.h}</h2><p>${tk.p}</p><p class="ps">${tk.ps}</p>
+    </div>`;
+  }
+  else{
+    const qc=T.q[q.id];
+    const n=String(numberedIndex(q)).padStart(2,'0');
+    let body='';
+    if(q.type==='text'){
+      const val=answers[q.id]||'';
+      body=`<input class="field" id="inp" type="${q.inputType}" value="${esc(val)}" placeholder="${qc.ph||''}" autocomplete="off" oninput="clearErr()" onkeydown="if(event.key==='Enter'){event.preventDefault();go(1)}">`;
+    } else if(q.type==='phone'){
+      const cur=answers[q.id]||{cc:'US',num:''};
+      let opts='';
+      COUNTRIES.forEach(c=>{
+        const sel=cur.cc===c.code?'selected':'';
+        const label=c.dial?`${c.flag} ${c.dial}`:`${c.flag}`;
+        opts+=`<option value="${c.code}" ${sel}>${label}</option>`;
+      });
+      body=`<div class="phonewrap">
+          <div class="ccsel"><select id="cc" onchange="clearErr()">${opts}</select></div>
+          <input class="field" id="inp" type="tel" inputmode="numeric" value="${esc(cur.num)}" placeholder="${qc.ph||''}" autocomplete="off"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'');clearErr()" onkeydown="if(event.key==='Enter'){event.preventDefault();go(1)}">
+        </div>
+        <div class="phonehint">Digits only — we'll add the country code automatically.</div>`;
+    } else if(q.type==='long'){
+      const val=answers[q.id]||'';
+      body=`<textarea class="field" id="inp" placeholder="${qc.ph||''}" oninput="clearErr()">${esc(val)}</textarea>`;
+    } else if(q.type==='single'){
+      body='<div class="choices">';
+      q.values.forEach((v,i)=>{
+        const sel=answers[q.id]===v?'sel':'';
+        body+=`<div class="choice ${sel}" onclick="pickSingle('${q.id}','${v}')"><span class="key">${String.fromCharCode(65+i)}</span><span class="ctxt">${qc.o[i]}</span></div>`;
+      });
+      body+='</div>';
+    } else if(q.type==='multi'){
+      const cur=answers[q.id]||[];
+      body='<div class="choices">';
+      q.values.forEach((v,i)=>{
+        const sel=cur.includes(v)?'sel':'';
+        body+=`<div class="choice multi ${sel}" onclick="pickMulti('${q.id}','${v}')"><span class="key">${sel?'✓':''}</span><span class="ctxt">${qc.o[i]}</span></div>`;
+      });
+      body+='</div>';
+    } else if(q.type==='scale'){
+      body='<div class="scale">';
+      q.values.forEach(v=>{ const sel=answers[q.id]===v?'sel':''; body+=`<div class="sc ${sel}" onclick="pickSingle('${q.id}',${v})">${v}</div>`; });
+      body+=`</div><div class="scalelabels"><span>1 · ${qc.lo}</span><span>${qc.hi} · 5</span></div>`;
+    }
+    const showEnter=(q.type==='text'||q.type==='long'||q.type==='phone');
+    html=`<div class="step active">
+      <div class="qnum">${ICON_ARROW} ${n} / ${String(totalNumbered()).padStart(2,'0')}</div>
+      <div class="qtext">${qc.t}</div>
+      ${qc.h?`<div class="qhint">${qc.h}</div>`:''}
+      ${body}
+      <div class="err" id="err"></div>
+      <div class="actions">
+        <button class="btn" id="okbtn" onclick="go(1)">${q.type==='multi'||q.type==='text'||q.type==='long'||q.type==='phone'?ui.next:ui.ok} ${ICON_ARROW}</button>
+        ${showEnter?`<span class="enterhint">${ui.enter}</span>`:''}
+        <button class="back" onclick="go(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>${ui.back}</button>
+      </div>
+    </div>`;
+  }
+  card.innerHTML=html;
+  const inp=document.getElementById('inp'); if(inp){ inp.focus(); }
+  updateProgress();
+}
+
+function updateProgress(){
+  const list=activeQuestions(); const q=list[step]; let pct=0;
+  if(q.type==='thankyou') pct=100;
+  else if(q.type!=='welcome') pct=(numberedIndex(q)-1)/totalNumbered()*100;
+  document.getElementById('bar').style.width=pct+'%';
+}
+
+function pickSingle(id,v){ answers[id]=v; clearErr(); render(); setTimeout(()=>go(1),180); }
+function pickMulti(id,v){
+  let cur=answers[id]||[];
+  if(v==='none'){ cur=['none']; }
+  else { cur=cur.filter(x=>x!=='none'); cur.includes(v)?cur=cur.filter(x=>x!==v):cur.push(v); }
+  answers[id]=cur; clearErr(); render();
+}
+function clearErr(){ const e=document.getElementById('err'); if(e)e.textContent=''; }
+function showErr(msg){ const e=document.getElementById('err'); if(e)e.textContent=msg; }
+
+function captureCurrent(){
+  const list=activeQuestions(); const q=list[step];
+  if(q.type==='text'||q.type==='long'){ const inp=document.getElementById('inp'); if(inp) answers[q.id]=inp.value.trim(); }
+  if(q.type==='phone'){
+    const cc=document.getElementById('cc'), inp=document.getElementById('inp');
+    if(cc&&inp) answers[q.id]={ cc:cc.value, num:inp.value.replace(/[^0-9]/g,'') };
+  }
+}
+function validateCurrent(){
+  const list=activeQuestions(); const q=list[step]; const ui=T.ui;
+  if(['welcome','thankyou'].includes(q.type)) return true;
+  if(!q.required) return true;
+  const a=answers[q.id];
+  if(q.type==='text'||q.type==='long'){
+    if(!a){ showErr(ui.reqText); return false; }
+    if(q.inputType==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a)){ showErr(ui.reqEmail); return false; }
+  } else if(q.type==='phone'){
+    if(!a || !a.num){ showErr(ui.reqPhone); return false; }
+    const country=COUNTRIES.find(c=>c.code===a.cc) || COUNTRIES[0];
+    if(country.len>0 && a.num.length!==country.len){
+      showErr(ui.reqPhoneLen.replace('{n}',country.len).replace('{c}',country.name)); return false;
+    }
+    if(country.len===0 && a.num.length<6){ showErr(ui.reqPhone); return false; }
+  } else if(q.type==='multi'){
+    if(!a||!a.length){ showErr(ui.reqChoice); return false; }
+  } else {
+    if(a===undefined||a===null){ showErr(ui.reqChoice); return false; }
+  }
+  return true;
+}
+
+function go(dir){
+  const list=activeQuestions();
+  if(dir>0){ captureCurrent(); if(!validateCurrent()) return; }
+  const next=step+dir;
+  if(next<0) return;
+  const target=list[next];
+  if(dir>0 && target && target.type==='thankyou'){ submit(); return; }
+  if(next>=list.length) return;
+  step=next; render();
+}
+
+/* ===== SUBMIT — envia para o webhook do n8n ===== */
+async function submit(){
+  const card=document.getElementById('card');
+  card.innerHTML=`<div class="step active"><div class="sending" style="display:flex"><span class="spin"></span>${T.ui.sending}</div></div>`;
+
+  // normaliza telefone para string "+1 5551234567"
+  const out = Object.assign({}, answers);
+  if(out.phone && typeof out.phone === 'object'){
+    const c = COUNTRIES.find(x => x.code === out.phone.cc) || COUNTRIES[0];
+    out.phone = ((c.dial ? c.dial + ' ' : '') + out.phone.num).trim();
+  }
+
+  const payload = {
+    submittedAt: new Date().toISOString(),
+    answers: out
+  };
+
+  const done = () => { step = activeQuestions().length - 1; render(); };
+  const fail = () => {
+    card.innerHTML=`<div class="step active">
+      <div class="qtext">Something went wrong.</div>
+      <div class="qhint">Please try again in a moment.</div>
+      <div class="actions"><button class="btn" onclick="submit()">Try again ${ICON_ARROW}</button></div>
+    </div>`;
+  };
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // n8n retorna 200 mesmo sem body — qualquer 2xx é sucesso
+    if(res.ok){ done(); } else { fail(); }
+  } catch(e) {
+    // Se o n8n não retornar CORS headers, o fetch vai falhar mesmo que a
+    // requisição chegue. Nesse caso assumimos sucesso para não travar o usuário.
+    done();
+  }
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+render();
+</script>
+</body>
+</html>
