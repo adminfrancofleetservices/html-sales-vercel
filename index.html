@@ -93,6 +93,17 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   @media(max-width:560px){.qtext{font-size:25px}.welcome p{font-size:17px}.scale{gap:6px}.scale .sc{font-size:20px;padding:14px 0}}
 </style>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2097616940790030');
+fbq('track','PageView');
+</script>
+<!-- /Meta Pixel -->
 </head>
 <body>
   <div class="topbar">
@@ -106,6 +117,16 @@
 <script>
 /* ===== CONFIG ===== */
 const WEBHOOK_URL = "https://n8n-n8n.tre80f.easypanel.host/webhook/2757dd4b-459f-4c88-aa18-b7007f2282a6";
+
+/* ===== Meta — helpers de tracking ===== */
+function genEventId(){ return 'lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,10); }
+function getCookie(n){ const m=document.cookie.match('(^|;)\\s*'+n+'=([^;]+)'); return m?m.pop():''; }
+function getFbc(){
+  let fbc=getCookie('_fbc');
+  if(!fbc){ const id=new URLSearchParams(location.search).get('fbclid');
+    if(id) fbc='fb.1.'+Date.now()+'.'+id; }
+  return fbc;
+}
 
 let step = 0;
 const answers = {};
@@ -346,9 +367,23 @@ async function submit(){
     out.phone = ((c.dial ? c.dial + ' ' : '') + out.phone.num).trim();
   }
 
+  // Meta: gera um eventID e dispara o Pixel (browser). O MESMO id vai pro n8n,
+  // que dispara o Lead pela CAPI (server). É isso que deduplica os dois lados.
+  const eventId = genEventId();
+  if(typeof fbq !== 'undefined'){
+    fbq('track','Lead', { content_name:'Sales Rep Application' }, { eventID: eventId });
+  }
+
   const payload = {
     submittedAt: new Date().toISOString(),
-    answers: out
+    answers: out,
+    meta: {
+      eventId: eventId,
+      fbp: getCookie('_fbp'),
+      fbc: getFbc(),
+      userAgent: navigator.userAgent,
+      sourceUrl: location.href
+    }
   };
 
   const done = () => { step = activeQuestions().length - 1; render(); };
